@@ -21,12 +21,13 @@ W_max = 14
 model = pyo.ConcreteModel()
 model.x = pyo.Var( A, within=pyo.Binary )
 
-model.obj = pyo.Objective(
-    expr = sum( b[i]*model.x[i] for i in A ), 
-    sense = pyo.maximize )
+def obj_rule(m):
+    return sum( b[i]*m.x[i] for i in A)
+model.obj = pyo.Objective(rule=obj_rule, sense = pyo.maximize )
 
-model.weight_con = pyo.Constraint(
-    expr = sum( w[i]*model.x[i] for i in A ) <= W_max )
+def weight_con_rule(m):
+    return sum( w[i]*m.x[i] for i in A) <= W_max
+model.weight_con = pyo.Constraint(rule=weight_con_rule)
 
 opt = pyo.SolverFactory('glpk')
 opt_success = opt.solve(model)
