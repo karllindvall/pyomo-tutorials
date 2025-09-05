@@ -22,7 +22,7 @@ def obj_rule(m):
 model.obj = pyo.Objective(rule=obj_rule)
 
 def con_rule(m):
-    # TODO: SPECIFY CONSTRAINT HERE
+    return m.y == m.x - 1
 model.con = pyo.Constraint(rule=con_rule)
 
 solver = pyo.SolverFactory('ipopt')

@@ -14,7 +14,7 @@ import pyomo.environ as pyo
 
 model = pyo.ConcreteModel()
 
-model.x = pyo.Var(initialize=5.0)
+model.x = pyo.Var(initialize=5.0, bounds=(1.001, None))
 model.y = pyo.Var(initialize=5.0)
 
 def obj_rule(m):
@@ -26,7 +26,7 @@ def con_rule(m):
 model.con = pyo.Constraint(rule=con_rule)
 
 solver = pyo.SolverFactory('ipopt')
-# TODO: ADD SOLVER OPTIONS HERE
+solver.options['halt_on_ampl_error'] = 'yes'
 solver.solve(model, tee=True)
 
 print(pyo.value(model.x))
