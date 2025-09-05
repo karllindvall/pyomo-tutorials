@@ -29,7 +29,22 @@ def weight_con_rule(m):
 model.weight_con = pyo.Constraint(rule=weight_con_rule)
 
 opt = pyo.SolverFactory('glpk')
-opt_success = opt.solve(model)
 
-model.pprint()
+model.int_cuts = pyo.ConstraintList()
 
+for k in range(5):
+    # Solve the current model
+    result_obj = opt.solve(model)
+
+    # Print sol
+    output_str = "Obj: " + str(pyo.value(model.obj))
+    for i in A:
+        output_str += "  x[%s]: %f" % (str(i), pyo.value(model.x[i]))
+    print(output_str)
+
+    # Add cut so same solution is not provided twice
+    cut = 0
+    for i in A:
+        x_i = round(pyo.value(model.x[i]))
+        cut += (1 - model.x[i]) if x_i == 1 else model.x[i]
+    model.int_cuts.add(cut >= 1)
