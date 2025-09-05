@@ -12,30 +12,40 @@
 
 import pyomo.environ as pyo
 
-A = ['hammer', 'wrench', 'screwdriver', 'towel']
-b = {'hammer':8, 'wrench':3, 'screwdriver':6, 'towel':11}
-w = {'hammer':5, 'wrench':7, 'screwdriver':4, 'towel':3}
-W_max = 14
+wrench_value = [4, 5, 6, 7, 8]
 
-model = pyo.ConcreteModel()
-model.x = pyo.Var( A, within=pyo.Binary )
+for j in range(len(wrench_value)):
 
-model.obj = pyo.Objective(
-    expr = sum( b[i]*model.x[i] for i in A ), 
-    sense = pyo.maximize )
+    A = ['hammer', 'wrench', 'screwdriver', 'towel']
+    b = {'hammer':8, 'wrench':wrench_value[j], 'screwdriver':6, 'towel':11}
+    w = {'hammer':5, 'wrench':7, 'screwdriver':4, 'towel':3}
+    W_max = 14
 
-model.weight_con = pyo.Constraint(
-    expr = sum( w[i]*model.x[i] for i in A ) <= W_max )
+    model = pyo.ConcreteModel()
+    model.x = pyo.Var( A, within=pyo.Binary )
 
-opt = pyo.SolverFactory('glpk')
-opt_success = opt.solve(model)
+    model.obj = pyo.Objective(
+        expr = sum( b[i]*model.x[i] for i in A ), 
+        sense = pyo.maximize )
 
-total_weight = sum( w[i]*pyo.value(model.x[i]) for i in A )
-# TODO: INSERT CODE HERE TO PRINT TOTAL WEIGHT AND BENEFIT
+    model.weight_con = pyo.Constraint(
+        expr = sum( w[i]*model.x[i] for i in A ) <= W_max )
 
-print('%12s %12s' % ('Item', 'Selected'))
-print('=========================')
-for i in A:
-    # TODO: INSERT CODE HERE TO PRINT EACH ITEM AND WHETHER OR NOT IT WAS SELECTED
-print('-------------------------')
+    opt = pyo.SolverFactory('glpk')
+    opt_success = opt.solve(model)
 
+    total_weight = sum( w[i]*pyo.value(model.x[i]) for i in A )
+    print("Total weight:", total_weight)
+    print("Total benefit:", pyo.value(model.obj))
+
+
+    print('%12s %12s' % ('Item', 'Selected'))
+    print('=========================')
+    for i in A:
+        acquired = "No"
+        if round(pyo.value(model.x[i])) == 1:
+            acquired = "Yes"
+        print('%12s %12s' % (i, acquired))
+    print('-------------------------')
+
+print("Wrench gets selected after reaching a value of 8.")
