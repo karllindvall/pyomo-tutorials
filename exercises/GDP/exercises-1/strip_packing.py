@@ -60,11 +60,18 @@ model.total_length = pyo.Objective(expr=model.MaxLength)
 
 #
 # Insert the no-overlap disjunctions here!
-#
 
+@model.Disjunction(model.OVERLAP_PAIRS)
+def no_overlap(m, i, j):
+    return [
+        m.x[i] + m.Length[i] <= m.x[j],
+        m.x[j] + m.Length[j] <= m.x[i],
+        m.y[i] + m.Width[i] <= m.y[j],
+        m.y[j] + m.Width[j] <= m.y[i]
+    ]
 #
 # Transform the model using the Big-M relaxation here!
-#
+pyo.TransformationFactory('gdp.bigm').apply_to(model)
 
 #
 # Solve and print the solution
