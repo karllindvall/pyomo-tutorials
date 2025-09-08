@@ -69,6 +69,9 @@ solver.solve(m, tee=True)
 
 
 ## Extracting pyomo variables and plotting
+print('k1= '+str(pyo.value(m.k1)))
+print('k2= '+str(pyo.value(m.k2)))
+
 meas_time = list(m.meas_time)
 a_meas = [pyo.value(m.ameas[i]) for i in m.meas_time]
 b_meas = [pyo.value(m.bmeas[i]) for i in m.meas_time]
