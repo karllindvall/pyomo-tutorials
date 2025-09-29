@@ -78,7 +78,7 @@ def connect_inputs(m):
 def connect_outputs(m):
     return m.y == m.nn.outputs[0]
 
-status_4_bigm = pyo.SolverFactory("cbc").solve(model4_bigm, tee=False)
+status_4_bigm = pyo.SolverFactory("glpk").solve(model4_bigm, tee=False)
 solution_4_bigm = (pyo.value(model4_bigm.x), pyo.value(model4_bigm.y))
 
 
@@ -105,9 +105,15 @@ def y_def(m):
 modela_comp.y_def_con = pyo.Constraint(rule=y_def)
 
 # ReLU Complimentary formulation
-def relu_def(m, j):
-    return complements(0 <= m.h[j], m.h[j] - m.z[j] >= 0)       # complimentarity conditions
-modela_comp.relu_con = Complementarity(range(3), rule=relu_def)
+def relu_nonneg(m, j):
+    return m.h[j] >= 0
+modela_comp.relu_nonneg_con = pyo.Constraint(range(3), rule=relu_nonneg)
+def relu_gap(m, j):
+    return m.h[j] - m.z[j] >= 0
+modela_comp.relu_gap_con = pyo.Constraint(range(3), rule=relu_gap)
+def relu_prod(m, j):
+    return m.h[j]*(m.h[j] - m.z[j]) == 0
+modela_comp.relu_prod_con = pyo.Constraint(range(3), rule=relu_prod)
 
 status_a_comp = pyo.SolverFactory("ipopt").solve(modela_comp, tee=False)
 solution_a_comp = (pyo.value(modela_comp.x), pyo.value(modela_comp.y))
@@ -140,26 +146,23 @@ modela_bigm.z_def_con = pyo.Constraint(range(3), rule=z_def_bigm)
 # Output layer
 def y_def_bigm(m):
     return m.y == sum(W2[j]*m.h[j] for j in range(3)) + b2
-modela_bigm.y_def_con = pyo.Constraint(range(3), rule=y_def_bigm)
+modela_bigm.y_def_con = pyo.Constraint(rule=y_def_bigm)
 
 # BigM constraints
-@modela_bigm.Constraint()
 def relu1(m, j):
     return m.h[j] >= 0
-
-@modela_bigm.Constraint()
+modela_bigm.relu1 = pyo.Constraint(range(3), rule=relu1)
 def relu2(m, j):
     return m.h[j] >= m.z[j]
-
-@modela_bigm.Constraint()
+modela_bigm.relu2 = pyo.Constraint(range(3), rule=relu2)
 def relu3(m, j):
     return m.h[j] <= m.z[j] - (1 - m.delta[j])*zL[j]
-
-@modela_bigm.Constraint()
+modela_bigm.relu3 = pyo.Constraint(range(3), rule=relu3)
 def relu4(m, j):
     return m.h[j] <= m.delta[j]*zU[j]
+modela_bigm.relu4 = pyo.Constraint(range(3), rule=relu4)
 
-status_a_bigm = pyo.SolverFactory("cbc").solve(modela_bigm, tee=False)
+status_a_bigm = pyo.SolverFactory("glpk").solve(modela_bigm, tee=False)
 solution_a_bigm = (pyo.value(modela_bigm.x), pyo.value(modela_bigm.y))
 
 
