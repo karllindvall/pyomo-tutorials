@@ -10,5 +10,6 @@ from .training import make_dataloader, train_model
 from .data import load_csv, scale_dataset, bounds_from_array
 
 # ONNX
+from .onnx_constructor import export_to_omlt
 
 # Formulations
