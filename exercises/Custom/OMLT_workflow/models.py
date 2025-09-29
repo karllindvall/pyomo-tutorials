@@ -39,3 +39,13 @@ class MixedNN(nn.Module):
         x = torch.sigmoid(self.d1(x))
         x = F.relu(self.d2(x))
         return self.out(x)
+    
+# Simple NN
+class SimpleNN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.d1 = nn.Linear(1, 3)
+        self.out = nn.Linear(3, 1)
+    def forward(self, x):
+        x = F.relu(self.d1(x))
+        return self.out(x)
