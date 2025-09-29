@@ -1,5 +1,4 @@
 import pyomo.environ as pyo
-from pyomo.mpec import Complementarity, complements
 import omlt
 from omlt import OmltBlock
 from omlt.neuralnet import (
